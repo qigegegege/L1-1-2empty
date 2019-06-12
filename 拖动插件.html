@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>滑动杆实现DEMO演示</title>
+
+<script type="text/javascript" src="https://cdn.bootcss.com/zepto/1.0rc1/zepto.min.js"></script>
+
+<style>
+ul,li{ padding:0; margin:0;list-style-type:none;-webkit-box-sizing:border-box;box-sizing:border-box;}
+.clearfix:after { display: block; content: ""; clear: both; }
+
+.slider-date{ height:36px; line-height:36px; background: #e8e8e8; display:inline-block; position:relative;}
+.slider-date .slider-bg li{ position:relative; float:left; width:50px; border-left:solid 1px #ddd; font-size:12px; text-align:center;}
+.slider-date .slider-bg span{ display:none;}
+
+.slider-date .slider-bg li:first-child{border-left:none;}
+.slider-date .slider-bar{ position:absolute; top:-2px; left:0; overflow:hidden; height:40px; width:50px;transition:all 0.1s ease-in-out;}
+.slider-date .slider-bar ul{ margin-top:1px; background: #43bfe3; color:#fff; height:36px; width:1000px;}
+.slider-date .slider-bar-btn{ line-height:40px; text-align:center; position:absolute; top:-2px; right:0px; display:block; width:16px; height:40px; background: #2dacd1; color:#fff;}
+.slider-date .slider-bar-btn i{display: inline-block; margin:12px 2px; width: 2px; height: 12px; background: #68c3de;} 
+</style>
+
+<script type="text/javascript">
+
+/*;(function($) {
+    $.fn.sliderDate = function(setting) {
+        var defaults = {
+                callback: false //默认回调函数为false
+            }
+        //如果setting为空，就取default的值
+        var setting = $.extend(defaults, setting);
+        this.each(function() {
+            //插件实现代码 
+            //var $sliderDate = $(".slider-date");
+            var $sliderDate = $(this);
+			var $sliderBar = $sliderDate.find(".slider-bar");
+			var $sliderBtn = $sliderDate.find(".slider-bar-btn");
+			var lis = $sliderDate.find('#slider-bg>li');
+			var liWid = 50+1; //单个li的宽度
+
+			//滚动指定的位置
+			var sliderToDes = function(index){
+				//最大不能超过11
+				if(index >= 5){
+					index = 5;
+				}
+				//最小不能小于 0 
+				if(index <= 0){
+					index = 1;
+				}
+				//背景动画
+				$sliderBar.css({
+					"width" : liWid*(index)
+				});
+                //设置那个被选中
+                lis.removeClass("cur");
+                $(lis[index - 1]).addClass('cur');
+				//执行回调
+				if(setting.callback){
+					setting.callback(index);
+				}
+
+			};
+
+			//点击 - 滚动到指定位置
+			$sliderDate.on('click', "li", function(e) {
+				//执行滚动方法
+				sliderToDes($(this).index()+1);
+			});
+
+			//拖动 - 滚动到指定位置
+			$sliderBtn.on('touchstart', function(event) {
+				var $this = $(this),touchs =  event.touches[0];
+				var pointX = touchs.pageX - $this.parent().width();
+				var wid = null;
+				//拖动事件
+				$(document).on('touchmove',function(ev){
+					var touchs = ev.touches[0];
+					wid = touchs.pageX - pointX
+					if(wid > 20 && wid < 255){
+					   $sliderBar.css("width", wid);
+					}
+				}).on('touchend',function(e){
+					$(this).off('touchstart touchmove');
+					var index = Math.round(wid/liWid);
+					sliderToDes(index);
+				});
+			});
+        });
+    }
+})(Zepto);*/
+
+$(function(){
+
+	$.fn.sliderData = function (options){
+    var defaults = {
+    	callback : function(){}
+    }
+    var options = $.extend(defaults,options);
+    //底部展示
+    var $sliderBg = $("#slider-bg");
+    //上面的拖动长度
+    var $sliderTopBar = $(".slider-bar");
+    // 一个li 的宽度
+    var liWid = $sliderTopBar.find('li').width() + 1 ; //右边的边框
+    //gotoIndx
+    function gotoIndex(index){
+         if(index >= 5){
+              index = 5
+         }else if(index <= 1){
+              index = 1;
+         }
+         //加载那个宽度
+         $sliderTopBar.css({
+             "width": liWid * index
+         });
+         
+         if (options.callback != undefined) {
+         	options.callback.call(this,index);
+         };
+
+
+    };
+
+
+    $(".slider-bar-btn").on('touchstart', function(event) {
+    	event.preventDefault();
+    	var $this = $(this),wid = null;
+    	var touchs = event.touches[0];
+    	var leftWid =  touchs.pageX - $this.parent().width();//就第一次触发
+
+    	$(document).on('touchmove', function(event) {
+    		var touchs = event.touches[0];
+            wid = touchs.pageX - leftWid;
+            if(wid > 20 && wid < parseInt(liWid * 5)){
+                   $sliderTopBar.css({
+                   	'width': wid
+                   });
+            }
+
+    	}).on('touchend', function(event) {
+    		event.preventDefault();
+            $this.off("touchstart touchmove");
+            var index = Math.round(wid / liWid);
+            gotoIndex(index);
+    	});
+    });
+    
+}
+
+	function a(index){
+		console.log(index+1);
+	}
+	$("#slider-date-1").sliderData({callback:a});
+});
+
+
+
+</script>
+</head>
+<body>
+<center>
+<div class="slider-date" id="slider-date-1">
+
+	<!--底层-->
+	<ul class="slider-bg clearfix" id="slider-bg">
+		<li>1</li>
+		<li>2</li>
+		<li>3</li>
+		<li>4</li>
+		<li>5</li>
+	</ul>
+
+	<!--互动层-->
+	<div class="slider-bar">
+		<ul class="slider-bg clearfix">
+			<li>1<span>1个月</span></li>
+			<li>2<span>2个月</span></li>
+			<li>3<span>3个月</span></li>
+			<li>4<span>4个月</span></li>
+			<li>5<span>5个月</span></li>
+		</ul>
+		<!--滑块按钮-->
+		<a href="javascript:;" class="slider-bar-btn"><i></i><i></i></a>
+	</div>
+
+</div>
+
+</center>
+
+</body>
+</html>
